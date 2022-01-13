@@ -1,0 +1,75 @@
+-- 1 -- Afficher l'ID des livres qui sont dans la nature;
+	SELECT id_livre FROM emprunt WHERE date_rendu IS NULL;
+	-- Pour NULL on utilise pas '=' mais 'IS' ;
+
+-- 2 -- Titres des livres dans la nature
+	SELECT titre FROM livre WHERE id_livre IN (SELECT id_livre FROM emprunt WHERE date_rendu IS NULL);
+
+-- 3-- je souhaite connaitre les id des livre que chloe a emprunter
+	SELECT id_livre FROM emprunt WHERE id_abonne IN (SELECT id_abonne FROM abonne WHERE prenom = 'Chloe');
+
+-- 4 -- afficher les prenoms des abonnes ayant amprunté un livre le 19/12/2014
+	SELECT prenom FROM abonne WHERE id_abonne IN (SELECT id_abonne FROM emprunt WHERE date_sortie = "2014-12-19");
+	
+-- 5 -- afficher la liste des abonnes ayant deja emprunter un livre d'alphonse Daudet
+	SELECT prenom FROM abonne WHERE id_abonne IN(SELECT id_abonne FROM emprunt WHERE id_livre In(SELECT id_livre FROM livre WHERE auteur = "ALPHONSE DAUDET"));
+
+-- 6 -- afficher le titre des livre que Chloe a emprunté	
+	SELECT titre FROM livre WHERE id_livre IN(SELECT id_livre FROM emprunt WHERE id_abonne IN(SELECT id_abonne FROM abonne WHERE prenom = "Chloe"));
+
+-- 7 -- afficher le titre des livre que Chloe n'a pas encore emprunté
+	SELECT titre FROM livre WHERE id_livre NOT IN(SELECT id_livre FROM emprunt WHERE id_abonne IN(SELECT id_abonne FROM abonne WHERE prenom = "Chloe"));
+/*POUR METTRE EN NEGATION >> NOT*/
+
+-- 8 -- afficher le titre des livre que Chloe n'a pas encore rendu
+	SELECT titre FROM livre WHERE id_livre IN(SELECT id_livre FROM emprunt WHERE date_rendu = NULL AND id_abonne IN(SELECT id_abonne FROM abonne WHERE prenom = "Chloe"));
+/* QUAND la valeur est NULL >> pas de = mais IS */
+	SELECT titre FROM livre WHERE id_livre IN(SELECT id_livre FROM emprunt WHERE date_rendu IS NULL AND id_abonne IN(SELECT id_abonne FROM abonne WHERE prenom = "Chloe"));
+
+-- 9 -- afficher le prenom de l'abonne qui a emprunter le + de livre	
+	SELECT prenom FROM abonne WHERE id_abonne =(SELECT id_abonne FROM emprunt GROUP BY id_abonne ORDER BY COUNT(id_abonne) DESC LIMIT 0,1);
+-- pour récupérer l'id_abonne de la personne ayant emprunter le plus de livre il faut compter le nombre d'enregistrement la concrnant dans la table emprunt.
+--On utilise alors GROOUP BY pour regrouper tous les enregistrement par id_abonne puis ORDER BY sur COUNT(id_abonne) pour trier dans l'order
+--de nombre d'enregistrement. Enfin LIMIT nous permet d'afficher seulement 1 resultat.
+
+-- 10 -- Combien de livres GUILLAUME a-t-il emprunter?
+SELECT COUNT(*) FROM emprunt WHERE id_abonne IN(SELECT id_abonne FROM abonne WHERE prenom = 'Guillaume');
+
+
+
+__________________________Modelisation__________________________________________
+table: abonne
++-----------+-----------+
+| id_abonne | prenom    |
++-----------+-----------+
+|         1 | Guillaume |
+|         2 | Benoit    |
+|         3 | Chloe     |
+|         4 | Laura     |
++-----------+-----------+
+
+table: emprunt
++------------+----------+-----------+--------------+------------+
+| id_emprunt | id_livre | id_abonne |  date_sortie | date_rendu |
++------------+----------+-----------+--------------+------------+
+|          1 |      100 |         1 | 2011-12-17   | 2011-12-18 |
+|          2 |      101 |         2 | 2011-12-18   | 2011-12-20 |
+|          3 |      100 |         3 | 2011-12-19   | 2011-12-22 |
+|          4 |      103 |         4 | 2011-12-19   | 2011-12-22 |
+|          5 |      104 |         1 | 2011-12-19   | 2011-12-28 |
+|          6 |      105 |         2 | 2012-03-20   | 2012-03-26 |
+|          7 |      105 |         3 | 2013-06-13   | NULL       |
+|          8 |      100 |         2 | 2013-06-15   | NULL       |
++------------+----------+-----------+--------------+------------+
+
+table: livre
++----------+-------------------+-------------------------+
+| id_livre | auteur            | titre                   |
++----------+-------------------+-------------------------+
+|      100 | GUY DE MAUPASSANT | Une vie                 |
+|      101 | GUY DE MAUPASSANT | Bel-Ami                 |
+|      102 | HONORE DE BALZAC  | Le pere Goriot          |
+|      103 | ALPHONSE DAUDET   | Le Petit chose          |
+|      104 | ALEXANDRE DUMAS   | La Reine Margot         |
+|      105 | ALEXANDRE DUMAS   | Les Trois Mousquetaires |
++----------+-------------------+---------------------

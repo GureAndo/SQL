@@ -1,0 +1,14 @@
+Structured > structure
+Query > requête
+Language > langage
+
+une requête q'effectue en 3 étapes:
+	1-Formulation (de ma requête)
+	2-Execution de ma requête
+	3-Résultat
+
+il y a 4 types de requêtes:
+	-affichage (select, show), requête de selection
+	-insertion (insert), requête d'insertion
+	-modification (update, replace), requête de modification
+	-supprimer (delete, drop, truncate), requête de supression
